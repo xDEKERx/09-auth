@@ -1,53 +1,76 @@
-.menuContainer {
-    position: relative;
-    display: inline-block;
-}
+"use client";
 
-.menuButton {
-    background-color: #f5f5f5;
-    color: #333;
-    border: 1px solid #ccc;
-    padding: 8px 16px;
-    font-size: 16px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.3s ease, box-shadow 0.2s ease;
-}
+import {
+  useState,
+  useEffect,
+  useRef,
+  useCallback
+} from "react";
+import Link from "next/link";
+import { MENU_TAG_OPTIONS } from "@/lib/constants";
+import css from "./TagsMenu.module.css";
 
-.menuButton:hover {
-    background-color: #eaeaea;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
+export default function TagsMenu() {
+  const [isOpen, setIsOpen] = useState(false);
 
-.menuList {
-    position: absolute;
-    top: calc(100% + 6px);
-    left: 0;
-    background-color: #333;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    padding: 6px 0;
-    margin: 0;
-    list-style: none;
-    min-width: 180px;
-    z-index: 1000;
-}
+  const menuRef = useRef<HTMLDivElement>(null);
 
-.menuItem {
-    margin: 0;
-}
+  const toggleMenu = () => setIsOpen((prev) => !prev);
 
-.menuLink {
-    display: block;
-    padding: 8px 16px;
-    color: #f0f0f0;
-    text-decoration: none;
-    font-size: 15px;
-    transition: background-color 0.2s ease;
-}
+  const closeMenu = useCallback(() => setIsOpen(false), []);
 
-.menuLink:hover {
-    background-color: #f0f0f0;
-    color: #333;
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        closeMenu();
+      }
+    };
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(event.target as Node)
+      ) {
+        closeMenu();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen, closeMenu]);
+
+  return (
+    <div ref={menuRef} className={css.menuContainer}>
+
+      <button onClick={toggleMenu}
+        className={css.menuButton}
+        aria-haspopup="true"
+        aria-expanded={isOpen}>
+        Notes ▾
+      </button>
+
+      {isOpen && (
+        <ul className={css.menuList}>
+          {MENU_TAG_OPTIONS.map((tag) => (
+            <li key={tag} className={css.menuItem}>
+              <Link
+                onClick={toggleMenu}
+                href={`/notes/filter/${tag}`}
+                className={css.menuLink}
+              >
+                {tag}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
 }
