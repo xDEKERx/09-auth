@@ -1,4 +1,8 @@
-import { QueryClient, HydrationBoundary, dehydrate } from "@tanstack/react-query";
+import {
+  QueryClient,
+  HydrationBoundary,
+  dehydrate,
+} from "@tanstack/react-query";
 import { fetchNoteById } from "@/lib/api";
 import NoteDetailsClient from "./NoteDetails.client";
 
@@ -9,6 +13,7 @@ type Props = {
 const NoteDetails = async ({ params }: Props) => {
   const { id } = await params;
   const noteId = Number(id);
+
   if (isNaN(noteId)) {
     throw new Error(`Invalid note ID: ${id}`);
   }
@@ -28,3 +33,4 @@ const NoteDetails = async ({ params }: Props) => {
 };
 
 export default NoteDetails;
+
