@@ -1,23 +1,32 @@
-import css from "./Footer.module.css";
-import Link from "next/link";
 
-const Footer = () => {
+import css from "./Footer.module.css";
+
+function Footer() {
   return (
     <footer className={css.footer}>
       <div className={css.content}>
         <p>© {new Date().getFullYear()} NoteHub. All rights reserved.</p>
         <div className={css.wrap}>
-          <p>Developer: Dmytro Solonko</p>
+          <p>
+            Developer:{" "}
+            <a
+              href="https://github.com/xDEKERx"
+              target="_blank"
+            >
+              Dmytro Solonko
+            </a>
+          </p>
           <p>
             Contact us:
-            <Link href="mailto:Psiholog211@gmail.com">
+            <a href="mailto:victorharasymiv97@gmail.com">
+              {" "}
               prostodeker@gmail.com
-            </Link>
+            </a>
           </p>
         </div>
       </div>
     </footer>
   );
-};
+}
 
 export default Footer;

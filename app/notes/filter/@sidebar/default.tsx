@@ -1,18 +1,34 @@
+"use client";
+import { usePathname } from "next/navigation";
+
 import Link from "next/link";
-import { MENU_TAG_OPTIONS } from "@/lib/constants";
+import clsx from "clsx";
+
 import css from "./SidebarNotes.module.css";
 
-export default function SidebarNotes() {
+const NotesSidebar = () => {
+  const pathname = usePathname();
+  const tagsList = ["All", "Work", "Personal", "Meeting", "Shopping", "Todo"];
+
   return (
     <ul className={css.menuList}>
-      {MENU_TAG_OPTIONS.map((tag) => (
-        <li key={tag} className={css.menuItem}>
-          <Link href={`/notes/filter/${tag}`} className={css.menuLink}>
-            {tag}
-          </Link>
-        </li>
-      ))}
+      {tagsList.map((tag, index) => {
+        return (
+          <li key={index} className={css.menuItem}>
+            <Link
+              href={`/notes/filter/${tag}`}
+              className={clsx(
+                css.menuLink,
+                pathname === `/notes/filter/${tag}` && css.active
+              )}
+            >
+              {tag}
+            </Link>
+          </li>
+        );
+      })}
     </ul>
   );
-}
+};
 
+export default NotesSidebar;

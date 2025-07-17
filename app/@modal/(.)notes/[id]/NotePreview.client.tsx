@@ -1,65 +1,48 @@
+
 "use client";
-
 import { useRouter } from "next/navigation";
-import { useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { fetchNoteById } from "@/lib/api";
-import Modal from "@/components/Modal/Modal";
-import css from "./NotePreview.module.css";
+import { useParams } from "next/navigation";
+import { fetchNoteById } from "../../../../lib/api";
 
-type NoteDetailsClientProps = { id: string | number };
+import Modal from "../../../../components/Modal/Modal";
 
-export default function NoteDetailsClient({ id }: NoteDetailsClientProps) {
+import css from "./NoteDetails.module.css";
+
+const NotePreview = () => {
   const router = useRouter();
+  const close = () => router.back();
+
+  const { id } = useParams<{ id: string }>();
+  const noteId = Number(id);
 
   const {
     data: note,
     isLoading,
-    isError,
+    error,
   } = useQuery({
-    queryKey: ["note", +id],
-    queryFn: () => fetchNoteById(+id),
+    queryKey: ["note", id],
+    queryFn: () => fetchNoteById(noteId),
     refetchOnMount: false,
   });
 
-  const handleClose = useCallback(() => {
-    router.back();
-  }, [router]);
-
-  if (isLoading) return <p>Loading, please wait...</p>;
-  if (isError || !note) return <p>Something went wrong.</p>;
+  if (isLoading) return <p className="loader">Loading, please wait...</p>;
+  if (error || !note) return <p className="error">Something went wrong.</p>;
 
   return (
-    <Modal onClose={handleClose}>
+    <Modal onClose={close}>
       <div className={css.container}>
-        <div className={css.item}>
-          <button onClick={handleClose} className={css.backBtn}>
-            Go Back
-          </button>
+        <h2 className={css.header}>{note.title}</h2>
+        <p className={css.content}>{note.content}</p>
+        <p className={css.date}>{note.createdAt}</p>
+        <p className={css.tag}>{note.tag}</p>
 
-          <div className={css.header}>
-            <h2>{note?.title}</h2>
-          </div>
-
-          <p className={css.content}>{note.content}</p>
-
-          {note.tag && (
-            <p className={css.tag}>
-              <strong>Tag:</strong> {note.tag}
-            </p>
-          )}
-
-          <p className={css.date}>
-            {note.updatedAt === note.createdAt
-              ? `Created at: ${new Date(note.createdAt).toLocaleString(
-                  "uk-UA"
-                )}`
-              : `Updated at: ${new Date(note.updatedAt).toLocaleString(
-                  "uk-UA"
-                )}`}
-          </p>
-        </div>
+        <button onClick={close} className={css.backBtn}>
+          Close
+        </button>
       </div>
     </Modal>
   );
-}
+};
+
+export default NotePreview;

@@ -1,93 +1,71 @@
 "use client";
-
-import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useState } from "react";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useDebounce } from "use-debounce";
 
-import { fetchNotes, FetchNotesHTTPResponse } from "@/lib/api";
-import NoteList from "@/components/NoteList/NoteList";
-import SearchBox from "@/components/SearchBox/SearchBox";
-import Loader from "@/components/Loader/Loader";
-import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
-import Pagination from "@/components//Pagination/Pagination";
-import Modal from "@/components/Modal/Modal";
-import NoteForm from "@/components/NoteForm/NoteForm";
+import NoteList from "../../../../components/NoteList/NoteList";
+import SearchBox from "../../../../components/SearchBox/SearchBox";
 
-import css from "./page.module.css";
+import { Note } from "../../../../types/note";
+import css from "./NotesPage.module.css";
 
-interface NotesClientProps {
-  initialData?: FetchNotesHTTPResponse;
-  tag?: string;
-}
+import { fetchNotes } from "../../../../lib/api";
+import Pagination from "../../../../components/Pagination/Pagination";
 
-export default function NotesClient({ initialData, tag }: NotesClientProps) {
-  const [page, setPage] = useState(1);
-  const [query, setQuery] = useState("");
-  const [isModal, setIsModal] = useState(false);
+type NotesHttpResponse = {
+  notes: Note[];
+  totalPages: number;
+};
+
+type Props = {
+  initialValue: NotesHttpResponse;
+  tag: string;
+};
+
+const NotesClient = ({ initialValue, tag }: Props) => {
+  const [page, setPage] = useState<number>(1);
+  const [query, setQuery] = useState<string>("");
+
+  // Queries
   const [debouncedQuery] = useDebounce(query, 400);
-  
-  useEffect(() => {
-    setPage(1);
-  }, [debouncedQuery, tag]);
 
-  const { data, isError, isLoading, isFetching, isSuccess } = useQuery({
-    queryKey: ["notes", tag, debouncedQuery, page],
-    queryFn: () => fetchNotes({ page: page, search: debouncedQuery, tag: tag }),
+  const { data } = useQuery<NotesHttpResponse>({
+    queryKey: ["notes", debouncedQuery, page, tag],
+    queryFn: () => fetchNotes(debouncedQuery, page, tag),
     placeholderData: keepPreviousData,
-    refetchOnMount: false,
-    initialData,
+    initialData: initialValue,
   });
-  
-  const handleCreateNote = () => {
-    setIsModal(true);
-  };
-  const closeModal = () => {
-    setIsModal(false);
+
+  const updateQuery = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setQuery(event.target.value);
+    setPage(1);
   };
 
   return (
     <>
-      <div className={css.app}>
-        <header className={css.toolbar}>
-
-          <SearchBox
-            value={query}
-            onChange={(query: string) => setQuery(query)}
+      <div className={css.toolbar}>
+        <SearchBox query={query} updateQuery={updateQuery} />
+        {data.totalPages && data.totalPages > 1 ? (
+          <Pagination
+            totalPages={data.totalPages}
+            page={page}
+            onPageChange={setPage}
           />
-
-          {isSuccess && data.totalPages > 1 && (
-            <Pagination
-              pageCount={data.totalPages}
-              currentPage={page}
-              onPageChange={(selectedPage: number) => setPage(selectedPage)}
-            />
-          )}
-
-          <button onClick={handleCreateNote} className={css.button}>
-            Create note +
-          </button>
-
-        </header>
-
-        {isModal && (
-          <Modal onClose={closeModal}>
-            <NoteForm onClose={closeModal} />
-          </Modal>
+        ) : (
+          ""
         )}
-
-        {(isLoading || isFetching) && <Loader />}
-
-        {isError && <ErrorMessage />}
-
-        {isSuccess && data?.notes?.length === 0 && <p>No notes found.</p>}
-
-        {data?.notes && data?.notes?.length > 0 && (
-          <NoteList notes={data.notes} />
-        )}
-
+        <Link className={css.button} href="/notes/action/create">
+          Create note +
+        </Link>
       </div>
+      {data.notes.length >= 1 ? (
+        <NoteList notes={data.notes} />
+      ) : (
+        <p className="error">Oops... We don`t have any entries for you.</p>
+      )}
     </>
   );
-}
+};
 
-
+export default NotesClient;

@@ -1,16 +1,16 @@
-"use client";
-
-import css from "./NoteList.module.css";
-import { Note } from "@/types/note";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { deleteNote } from "@/lib/api";
 import Link from "next/link";
 
-interface NoteListProps {
-  notes: Note[];
-}
+import { Note } from "../../types/note";
+import css from "./NoteList.module.css";
 
-export default function NoteList({ notes }: NoteListProps) {
+import { deleteNote } from "../../lib/api";
+
+type NoteListProps = {
+  notes: Note[];
+};
+
+const NoteList = ({ notes }: NoteListProps) => {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
@@ -19,28 +19,20 @@ export default function NoteList({ notes }: NoteListProps) {
       queryClient.invalidateQueries({ queryKey: ["notes"] });
     },
   });
-
-  const handleDelete = (id: number) => {
-    mutation.mutate(id);
-  };
-
   return (
     <ul className={css.list}>
-      {notes.map(({ title, content, tag, id }) => (
-        <li className={css.listItem} key={id}>
-          <h2 className={css.title}>{title}</h2>
-          <p className={css.content}>{content}</p>
+      {notes.map((note) => (
+        <li key={note.id} className={css.listItem}>
+          <h2 className={css.title}>{note.title}</h2>
+          <p className={css.content}>{note.content}</p>
           <div className={css.footer}>
-            <span className={css.tag}>{tag}</span>
-            <Link href={`/notes/${id}`} className={css.link}>
+            <span className={css.tag}>{note.tag}</span>
+            <Link href={`/notes/${note.id}`} className={css.link}>
               View details
             </Link>
             <button
-              onClick={() => {
-                handleDelete(id);
-              }}
+              onClick={() => mutation.mutate(note.id)}
               className={css.button}
-              disabled={mutation.isPending}
             >
               Delete
             </button>
@@ -49,4 +41,6 @@ export default function NoteList({ notes }: NoteListProps) {
       ))}
     </ul>
   );
-}
+};
+
+export default NoteList;

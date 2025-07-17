@@ -1,45 +1,48 @@
 "use client";
 
+import React, { useState } from "react";
 import Link from "next/link";
-import css from "./TagsMenu.module.css";
-import { useState } from "react";
-import { tags } from "@/lib/api";
 
-const TagsMenu = () => {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-  const toggle = () => setIsOpen(!isOpen);
+import css from "./TagsMenu.module.css";
+
+export const TagsMenu = () => {
+  const tagsList = ["All", "Work", "Personal", "Meeting", "Shopping", "Todo"];
+  const [openMenu, setOpenMenu] = useState(false);
 
   return (
     <div className={css.menuContainer}>
-      <button className={css.menuButton} onClick={toggle}>
-        Notes ▾
+      <button
+        onClick={() => setOpenMenu((prev) => !prev)}
+        className={css.menuButton}
+      >
+        Notes{" "}
+        <span
+          style={
+            openMenu !== false
+              ? { display: "inline-block", transform: "rotate(60deg)" }
+              : {}
+          }
+        >
+          ▾
+        </span>
       </button>
-      {isOpen && (
+      {openMenu && (
         <ul className={css.menuList}>
-          <li className={css.menuItem}>
-            <Link
-              onClick={toggle}
-              href={`/notes/filter/all`}
-              className={css.menuLink}
-            >
-              All notes
-            </Link>
-          </li>
-          {tags.map((tag) => (
-            <li className={css.menuItem} key={tag}>
-              <Link
-                onClick={toggle}
-                href={`/notes/filter/${tag}`}
-                className={css.menuLink}
-              >
-                {tag}
-              </Link>
-            </li>
-          ))}
+          {tagsList.map((tag, index) => {
+            return (
+              <li key={index} className={css.menuItem}>
+                <Link
+                  onClick={() => setOpenMenu((prev) => !prev)}
+                  href={`/notes/filter/${tag}`}
+                  className={css.menuLink}
+                >
+                  {tag}
+                </Link>
+              </li>
+            );
+          })}
         </ul>
       )}
     </div>
   );
 };
-
-export default TagsMenu;
