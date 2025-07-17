@@ -1,67 +1,34 @@
-"use client";
+'use client';
 
-import {
-  useState,
-  useEffect,
-  useRef,
-  useCallback
-} from "react";
-import Link from "next/link";
-import { MENU_TAG_OPTIONS } from "@/lib/constants";
-import css from "./TagsMenu.module.css";
+import { NOTE_TAGS } from '../../types/note';
+import { useState } from 'react';
+import Link from 'next/link';
+import css from './TagsMenu.module.css';
 
 export default function TagsMenu() {
   const [isOpen, setIsOpen] = useState(false);
-
-  const menuRef = useRef<HTMLDivElement>(null);
-
-  const toggleMenu = () => setIsOpen((prev) => !prev);
-
-  const closeMenu = useCallback(() => setIsOpen(false), []);
-
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        closeMenu();
-      }
-    };
-
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        menuRef.current &&
-        !menuRef.current.contains(event.target as Node)
-      ) {
-        closeMenu();
-      }
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
-    document.addEventListener("mousedown", handleClickOutside);
-
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [isOpen, closeMenu]);
+  const toggle = () => setIsOpen(!isOpen);
 
   return (
-    <div ref={menuRef} className={css.menuContainer}>
-
-      <button onClick={toggleMenu}
-        className={css.menuButton}
-        aria-haspopup="true"
-        aria-expanded={isOpen}>
+    <div className={css.menuContainer}>
+      <button onClick={toggle} className={css.menuButton}>
         Notes ▾
       </button>
-
       {isOpen && (
         <ul className={css.menuList}>
-          {MENU_TAG_OPTIONS.map((tag) => (
+          <li className={css.menuItem}>
+            <Link
+              onClick={toggle}
+              href={`/notes/filter/all`}
+              className={css.menuLink}
+            >
+              All notes
+            </Link>
+          </li>
+          {NOTE_TAGS.map(tag => (
             <li key={tag} className={css.menuItem}>
               <Link
-                onClick={toggleMenu}
+                onClick={toggle}
                 href={`/notes/filter/${tag}`}
                 className={css.menuLink}
               >
