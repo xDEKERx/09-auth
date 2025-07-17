@@ -1,17 +1,20 @@
-'use client';
+"use client";
 
-import { useRouter } from 'next/navigation';
-import { NewNoteData, NOTE_TAGS, NoteTag } from '../../types/note';
-import css from './NoteForm.module.css';
-import { useId } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { createNote } from '../../lib/api';
-import { useNoteDraftStore } from '../../lib/store/noteStore';
+import css from "./NoteForm.module.css";
+import { useQueryClient, useMutation } from "@tanstack/react-query";
+import { createNote } from "@/lib/api";
+import { NewNote, Tag } from "@/types/note";
+import { useRouter } from "next/navigation";
+import { useNoteDraftStore } from "@/lib/store/noteStore";
 
-export default function NoteForm() {
+interface NoteFormProps {
+  tags: Tag[];
+}
+
+export default function NoteForm({ tags }: NoteFormProps) {
   const router = useRouter();
-  const fieldId = useId();
   const queryClient = useQueryClient();
+
   const { draft, setDraft, clearDraft } = useNoteDraftStore();
 
   const handleChange = (
@@ -25,88 +28,73 @@ export default function NoteForm() {
     });
   };
 
-  const { mutate, isPending } = useMutation({
+  const handleCancel = () => router.push("/notes/filter/all");
+
+  const { mutate } = useMutation({
     mutationFn: createNote,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notes'] });
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
       clearDraft();
-      router.push('/notes/filter/all');
+      router.push("/notes/filter/all");
     },
   });
 
-  const handleCancel = () => router.push('/notes/filter/all');
-
   const handleSubmit = (formData: FormData) => {
-    const noteData: NewNoteData = {
-      title: formData.get('title') as string,
-      content: formData.get('content') as string,
-      tag: formData.get('tag') as NoteTag,
-    };
-    mutate(noteData);
+    const values = Object.fromEntries(formData) as NewNote;
+    mutate(values);
   };
 
   return (
-    <>
-      <form action={handleSubmit} className={css.form}>
-        <div className={css.formGroup}>
-          <label className={css.label} htmlFor={`${fieldId}-title`}>
-            Title
-          </label>
-          <input
-            type="text"
-            name="title"
-            defaultValue={draft?.title}
-            onChange={handleChange}
-            id={`${fieldId}-title`}
-            className={css.input}
-          />
-        </div>
+    <form action={handleSubmit} className={css.form}>
+      <label className={css.formGroup}>
+        Title
+        <input
+          className={css.input}
+          type="text"
+          name="title"
+          defaultValue={draft?.title}
+          onChange={handleChange}
+        />
+      </label>
 
-        <div className={css.formGroup}>
-          <label className={css.label} htmlFor={`${fieldId}-content`}>
-            Content
-          </label>
-          <textarea
-            name="content"
-            id={`${fieldId}-content`}
-            defaultValue={draft?.content}
-            onChange={handleChange}
-            className={css.textarea}
-          ></textarea>
-        </div>
+      <label className={css.formGroup}>
+        Content
+        <textarea
+          className={css.textarea}
+          name="content"
+          defaultValue={draft?.content}
+          onChange={handleChange}
+        ></textarea>
+      </label>
 
-        <div className={css.formGroup}>
-          <label className={css.label} htmlFor={`${fieldId}-tag`}>
-            Tag
-          </label>
-          <select
-            name="tag"
-            id={`${fieldId}-tag`}
-            defaultValue={draft?.tag}
-            onChange={handleChange}
-            className={css.select}
-          >
-            {NOTE_TAGS.map(tag => (
-              <option key={tag} value={tag}>
-                {tag}
-              </option>
-            ))}
-          </select>
-        </div>
+      <label className={css.formGroup}>
+        Tag
+        <select
+          className={css.select}
+          name="tag"
+          defaultValue={draft?.tag}
+          onChange={handleChange}
+        >
+          {tags.map((tag) => (
+            <option value={tag} key={tag}>
+              {tag}
+            </option>
+          ))}
+        </select>
+      </label>
 
-        <div className={css.actions}>
-          <button
-            type="button"
-            className={css.cancelButton}
-            onClick={handleCancel}
-          >
-            Cancel
-          </button>
-          <button type="submit" className={css.submitButton}>
-            {isPending ? 'Creating new note...' : 'Create note'}
-          </button>
-        </div>
-      </form>
-    </>
+      <div className={css.actions}>
+        <button
+          type="button"
+          className={css.cancelButton}
+          onClick={handleCancel}
+        >
+          Cancel
+        </button>
+        <button type="submit" className={css.submitButton}>
+          Create note
+        </button>
+      </div>
+    </form>
   );
 }
