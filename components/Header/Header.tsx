@@ -1,27 +1,29 @@
 
-/* components/Footer.module.css */
+import { TagsMenu } from "../TagsMenu/TagsMenu";
+import css from "./Header.module.css";
 
-.footer {
-  padding: 20px;
-  background-color: #f0f0f0;
-  text-align: center;
-  font-size: 14px;
-  color: #555;
-  border-top: 1px solid #ddd;
-}
+import Link from "next/link";
 
-.wrap {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-}
+const Header = () => {
+  return (
+    <header className={css.header}>
+      <Link className={css.headerLink} href="/" aria-label="Home">
+        NoteHub
+      </Link>
+      <nav aria-label="Main Navigation">
+        <ul className={css.navigation}>
+          <li className={css.navigationItem}>
+            <Link className={css.navigationLink} href="/">
+              Home
+            </Link>
+          </li>
+          <li className={css.navigationItem}>
+            <TagsMenu />
+          </li>
+        </ul>
+      </nav>
+    </header>
+  );
+};
 
-.footer a {
-  color: #226ec5;
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.footer a:hover {
-  text-decoration: underline;
-}
+export default Header;
