@@ -1,4 +1,3 @@
-
 import css from "./Footer.module.css";
 
 function Footer() {
@@ -10,7 +9,7 @@ function Footer() {
           <p>
             Developer:{" "}
             <a
-              href="https://github.com/xDEKERx"
+              href="https://github.com/xDEKER"
               target="_blank"
             >
               Dmytro Solonko
@@ -18,7 +17,7 @@ function Footer() {
           </p>
           <p>
             Contact us:
-            <a href="mailto:victorharasymiv97@gmail.com">
+            <a href="prostodeker@gmail.com">
               {" "}
               prostodeker@gmail.com
             </a>

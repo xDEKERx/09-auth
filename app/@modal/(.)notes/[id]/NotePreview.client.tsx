@@ -1,9 +1,8 @@
-
 "use client";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
-import { fetchNoteById } from "../../../../lib/api";
+import { fetchNoteById } from "../../../../lib/api/clientApi";
 
 import Modal from "../../../../components/Modal/Modal";
 
@@ -14,7 +13,7 @@ const NotePreview = () => {
   const close = () => router.back();
 
   const { id } = useParams<{ id: string }>();
-  const noteId = Number(id);
+  const noteId = id;
 
   const {
     data: note,
